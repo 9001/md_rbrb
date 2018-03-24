@@ -1,0 +1,16 @@
+# python
+__pycache__/
+*.py[cod]
+*$py.class
+MANIFEST.in
+MANIFEST
+md_rbrb.egg-info/
+buildenv/
+build/
+dist/
+
+# sublime
+*.sublime-workspace
+
+# winmerge
+*.bak

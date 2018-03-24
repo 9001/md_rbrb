@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+
+import md_rbrb
+
+if __name__ == '__main__':
+	md_rbrb.main()
+
