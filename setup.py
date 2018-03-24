@@ -25,7 +25,7 @@ if 'bdist_wheel' in sys.argv and not setuptools_available:
 NAME        = 'md_rbrb'
 VERSION     = None
 data_files  = [
-	('share/doc/md_rbrb', ['README.md','LICENSE'])
+	('share/doc/md_rbrb', ['README.md','README.rst','LICENSE'])
 ]
 manifest = ''
 for dontcare, files in data_files:
@@ -38,16 +38,26 @@ here = os.path.abspath(os.path.dirname(__file__))
 with open(here + '/MANIFEST.in', 'wb') as f:
 	f.write(manifest.encode('utf-8'))
 
-with open(here + '/README.md', 'rb') as f:
-	txt = f.read().decode('utf-8')
-	LONG_DESCRIPTION = txt
-	LDCT = 'text/markdown'
-
 with open(here + '/md_rbrb.py', 'rb') as f:
 	for ln in [x.decode('utf-8') for x in f]:
 		if ln.startswith('__version__'):
 			exec(ln)
 			break
+
+try:
+	LONG_DESCRIPTION = ''
+	LDCT = ''
+	with open(here + '/README.rst', 'rb') as f:
+		txt = f.read().decode('utf-8')
+		#txt = txt[txt.find('`'):]
+		LONG_DESCRIPTION = txt
+		LDCT = 'text/x-rst'
+except:
+	print('\n### could not open README.rst ###\n')
+	with open(here + '/README.md', 'rb') as f:
+		txt = f.read().decode('utf-8')
+		LONG_DESCRIPTION = txt
+		LDCT = 'text/markdown'
 
 
 class clean2(Command):
@@ -72,7 +82,8 @@ class clean2(Command):
 		nuke = []
 		for (dirpath, dirnames, filenames) in os.walk('.'):
 			for fn in filenames:
-				if fn.endswith('.pyc') \
+				if fn.endswith('.rst') \
+				or fn.endswith('.pyc') \
 				or fn.endswith('.pyo') \
 				or fn.endswith('.pyd') \
 				or fn.startswith('MANIFEST'):
@@ -80,6 +91,52 @@ class clean2(Command):
 		
 		for fn in nuke:
 			os.unlink(fn)
+
+
+class rstconv(Command):
+	description = 'Converts markdown to rst'
+	user_options = []
+	
+	def initialize_options(self):
+		pass
+	
+	def finalize_options(self):
+		pass
+	
+	def run(self):
+		self.proc_dir('.')
+		self.proc_dir('docs')
+	
+	def proc_dir(self, path):
+		import m2r
+		for (dirpath, dirnames, filenames) in os.walk(path):
+			
+			dirnames.sort()
+			for fn in sorted(filenames):
+				
+				fn = dirpath + '/' + fn
+				if not fn.endswith('.md'):
+					continue
+				
+				rst_fn = fn[:-3] + '.rst'
+				with open(fn, 'rb') as f:
+					md = f.read().decode('utf-8')
+				
+				for kw in ['docs/help-']:
+					md = md.replace('({0}'.format(kw),
+						'(https://github.com/9001/r0c/blob/master/{0}'.format(kw))
+				
+				for kw in ['docs','clients']:
+					md = md.replace('({0}/'.format(kw),
+						'(https://ocv.me/static/r0c/{0}/'.format(kw))
+				
+				md = md.replace('* **[', '* [').replace(')** <-', ') <-')
+				rst = m2r.convert(md)
+				rst = rst.replace(':raw-html-m2r:`<del>', ':sub:`')
+				rst = rst.replace('</del>`', '`')
+
+				with open(rst_fn, 'wb') as f:
+					f.write(rst.encode('utf-8'))
 
 
 args = {
@@ -117,6 +174,7 @@ args = {
 		'Environment :: Console'
 	],
 	'cmdclass' : {
+		'rstconv': rstconv,
 		'clean2': clean2
 	}
 }

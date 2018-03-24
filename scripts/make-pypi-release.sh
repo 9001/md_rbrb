@@ -2,15 +2,6 @@
 set -e
 echo
 
-
-sed=$( which gsed  2>/dev/null || which sed)
-find=$(which gfind 2>/dev/null || which find)
-sort=$(which gsort 2>/dev/null || which sort)
-
-which md5sum 2>/dev/null >/dev/null &&
-	md5sum=md5sum ||
-	md5sum="md5 -r"
-
 mode="$1"
 
 [[ "x$mode" == x ]] &&
@@ -20,14 +11,13 @@ mode="$1"
 	exit 1
 }
 
-[[ -e md_rbrb/__main__.py ]] || cd ..
-[[ -e md_rbrb/__main__.py ]] ||
+[[ -e md_rbrb.py ]] || cd ..
+[[ -e md_rbrb.py ]] ||
 {
 	echo "run me from within the md_rbrb folder"
 	echo
 	exit 1
 }
-
 
 # one-time stuff, do this manually through copy/paste
 true ||
@@ -58,10 +48,8 @@ EOF
 	
 	# test rst
 	pip install docutils
-	./setup.py --long-description | tee ~/Desktop/rst | rst2html.py > ~/Desktop/rst.html
+	./setup.py rstconv; ./setup.py --long-description | tee ~/Desktop/rst | rst2html.py > ~/Desktop/rst.html
 }
-
-
 
 pydir="$(
 	which python |
@@ -81,7 +69,9 @@ function have() {
 . buildenv/bin/activate
 have setuptools
 have wheel
+have m2r
 ./setup.py clean2
+./setup.py rstconv
 ./setup.py sdist bdist_wheel --universal
 [[ "x$mode" == "xu" ]] &&
 	./setup.py sdist bdist_wheel upload -r pypi
@@ -97,3 +87,4 @@ cat <<EOF
        ./setup.py clean2
    
 EOF
+
