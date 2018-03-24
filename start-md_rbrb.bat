@@ -1,2 +1,2 @@
-python md_rbrb.py
-pause
+@python md_rbrb.py
+@pause

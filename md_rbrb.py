@@ -11,9 +11,17 @@ __license__   = "MIT"
 __copyright__ = 2017
 
 
+##
+## CONFIG
+##
+
 # Rabi-Ribi v1.75
 ADR_BLOCK_ID = 0xd7d64
 ADR_BLOCK_POS = 0xd7d50
+
+##
+## END OF CONFIG
+##
 
 
 from ctypes.wintypes import \
@@ -32,6 +40,7 @@ import json
 import zlib
 import time
 import sys
+import os
 import re
 try:
     from builtins import chr
@@ -163,6 +172,74 @@ def getmodule(procname, modname):
             pass
 
 ##
+## change terminal color
+##
+
+def color(c):
+    # w: black blue green cyan red magenta yellow grey
+    # u: black red green yellow blue magenta cyan grey
+    cmap = [ 0, 4, 2, 6, 1, 5, 3, 7 ]
+    
+    # normal=0 bright_fg=8 bright_bg=128
+    # fg + bg * 16 + (style | light)
+    attrs = cmap[c % 8] + int(c / 8) * 8
+    attrs = int(attrs)
+    
+    # stdout=-11 stderr=-12
+    handle = -11
+    
+    mc = windll.kernel32.GetStdHandle
+    mc.argtypes = [ DWORD ]
+    handle = mc(handle)
+    
+    mc = windll.kernel32.SetConsoleTextAttribute
+    mc.argtypes = [ HANDLE, WORD ]
+    mc(handle, attrs)
+
+def printc(c, *args, **kwargs):
+    color(c)
+    print(*args, flush=True, **kwargs)
+    color(7)
+
+##
+## determine mecab location
+##
+
+PROG_FILES = os.getenv('PROGRAMFILES(x86)')
+
+if not PROG_FILES:
+    PROG_FILES = os.getenv('PROGRAMFILES')
+
+if not PROG_FILES:
+    print()
+    printc(8+1, 'could not find your program files folder')
+    print()
+    sys.exit(1)
+
+MECAB_BASE = PROG_FILES.rstrip('\\') + '\\MeCab\\'
+MECAB_PROG = MECAB_BASE + 'bin\\mecab.exe'
+
+if not os.path.isfile(MECAB_PROG):
+    print()
+    printc(8+1, 'you need to install mecab.exe first:')
+    printc(8+3, 'http://taku910.github.io/mecab/#win')
+    print()
+    printc(8+3, 'IMPORTANT:')
+    printc(8+3, 'when installing MeCab, choose Dictionary Charset "UTF-8"')
+    print()
+    sys.exit(1)
+
+with open(MECAB_BASE + 'dic\\ipadic\\sys.dic', 'rb') as f:
+    f.seek(0x28)
+    enc = f.read(5).decode('utf-8')
+    if enc != 'UTF-8':
+        print()
+        printc(8+1, 'your MeCab installation uses the wrong Dictionary Charset:')
+        printc(8+3, 'uninstall MeCab and reinstall with UTF-8')
+        print()
+        sys.exit(1)
+
+##
 ## figure out what character encoding is used for japanese
 ##
 
@@ -186,7 +263,7 @@ def chardet(input, expect):
                     continue
 
 def mecab(txt):
-    cmd = [ 'c:\\Program Files (x86)\\MeCab\\bin\\mecab.exe' ]
+    cmd = [ MECAB_PROG ]
     proc = subprocess.Popen(cmd,
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
@@ -226,36 +303,6 @@ def mecab(txt):
     return [ kana, html ]
 
 ##
-## change terminal color
-##
-
-def color(c):
-    # w: black blue green cyan red magenta yellow grey
-    # u: black red green yellow blue magenta cyan grey
-    cmap = [ 0, 4, 2, 6, 1, 5, 3, 7 ]
-    
-    # normal=0 bright_fg=8 bright_bg=128
-    # fg + bg * 16 + (style | light)
-    attrs = cmap[c % 8] + int(c / 8) * 8
-    attrs = int(attrs)
-    
-    # stdout=-11 stderr=-12
-    handle = -11
-    
-    mc = windll.kernel32.GetStdHandle
-    mc.argtypes = [ DWORD ]
-    handle = mc(handle)
-    
-    mc = windll.kernel32.SetConsoleTextAttribute
-    mc.argtypes = [ HANDLE, WORD ]
-    mc(handle, attrs)
-
-def printc(c, *args, **kwargs):
-    color(c)
-    print(*args, flush=True, **kwargs)
-    color(7)
-
-##
 ## httpd
 ##
 
@@ -283,7 +330,7 @@ class Httpd(object):
                     conn.close()
                     continue
                 data = data.decode('utf-8')
-                if not data.startswith('GET /the.html HTTP/1.1'):
+                if not data.startswith('GET / HTTP/1.1'):
                     msg = 'HTTP/1.1 404 Not Found\r\nContent-Length: 4\r\nConnection: close\r\n\r\nnope'
                     conn.sendall(msg.encode('utf-8'))
                     time.sleep(0.1)
@@ -394,7 +441,30 @@ def parse_rbrb(path, enc):
             scene_lines.append(line)
     return rbrb
 
-path = 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Rabi-Ribi\\localize\\event\\'
+if False:
+    bitness = struct.calcsize("P") * 8
+    if bitness == 32:
+        printc(8+2, 'your python is 32bit, good')
+    else:
+        printc(8+3, 'your python is {0}bit, this may not work'.format(bitness))
+
+path = None
+cmd = "wmic process where \"name='rabiribi.exe'\" get processid, executablepath /format:list"
+cmd_out = subprocess.check_output(cmd, shell=True).decode('utf-8')
+find = 'ExecutablePath='
+for line in cmd_out.split('\n'):
+    if line.startswith(find):
+        path = line[len(find):].rstrip()
+        path = path[:path.rfind('\\')]
+        path += '\\localize\\event\\'
+if path is None:
+    print()
+    printc(8+1, 'start the game first')
+    print()
+    sys.exit(1)
+
+printc(8+3, 'dialogue path:', path)
+
 rb_en = parse_rbrb(path + 'story_en.rbrb', 'utf-8')
 rb_ja = parse_rbrb(path + 'story_jp.rbrb', 'cp932')
 printc(8+3, 'rb_en entries:', len(rb_en))
@@ -404,8 +474,14 @@ printc(8+3, 'rb_ja entries:', len(rb_ja))
 ## it begins
 ##
 
+printc(8+3, 'accessing Rabi-Ribi process memory')
 pid, mod = getmodule('rabiribi.exe', 'rabiribi.exe')
 proc = OpenProcess(PROCESS_ALL_ACCESS, False, pid)
+printc(8+2, 'success')
+
+print()
+printc(8+6, 'open this in your web browser:  http://127.0.0.1:8086/')
+print()
 
 buflen = 512
 numread = c_ulong(0)
@@ -415,7 +491,9 @@ buf = (c_ubyte * buflen)()
 def read_mem(adr, len):
     global proc, buf, numread
     if not ReadProcessMemory(proc, adr, buf, len, byref(numread)):
-        print('read err')
+        print()
+        printc(8+1, 'this version of md_rbrb is not compatible with your version of Rabi-Ribi')
+        print()
         exit(1)
 
 def read_int(adr):
