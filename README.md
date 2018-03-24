@@ -1,7 +1,8 @@
 # multilanguage Rabi-Ribi display
 * MIT-licensed, 2017/02/19, ed@irc.rizon.net
-* https://ocv.me/stuff/md_rbrb.png
-* https://ocv.me/stuff/md_rbrb.mp4
+* https://ocv.me/stuff/md_rbrb.png -- screenshot
+* https://ocv.me/stuff/md_rbrb.mp4 -- video
+* https://pypi.org/project/md_rbrb/ -- download
 
 
 # usage
