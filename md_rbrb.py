@@ -4,7 +4,7 @@ from __future__ import print_function
 
 
 """md_rbrb.py: multilanguage Rabi-Ribi"""
-__version__   = "1.1.0"
+__version__   = "1.1.1"
 __built__     = "2018-03-24"
 __author__    = "ed <a@ocv.me>"
 __credits__   = ["stackoverflow.com"]
@@ -514,11 +514,18 @@ def main():
             block_id, block_pos))
         print()
         
+        new_text = ''
         html_text = ''
         if block_id > 0:
-            new_text = ''
-            en = next(x for x in rb_en if x[0] == block_id)[1][block_pos].strip()
-            ja = next(x for x in rb_ja if x[0] == block_id)[1][block_pos].strip()
+            try:
+                en = next(x for x in rb_en if x[0] == block_id)[1][block_pos].strip()
+            except:
+                en = ''
+            
+            try:
+                ja = next(x for x in rb_ja if x[0] == block_id)[1][block_pos].strip()
+            except:
+                ja = ''
             
             printc(8+3, 'ka: ', end='')
             lines = ja.replace('@', '\n    ')
