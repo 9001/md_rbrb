@@ -9,7 +9,7 @@
 * open a terminal: `WIN+R` `cmd`
 * install md_rbrb: `pip install md_rbrb`
 * run md_rbrb: `md_rbrb` (or maybe `python -m md_rbrb`)
-* visit http://127.0.0.1:8086/the.html
+* visit http://127.0.0.1:8086/
 
 if you are running md_rbrb from the source code directory, disregard all the above (except for the mecab part) and just run `start-md_rbrb.bat`
 
