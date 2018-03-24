@@ -22,7 +22,6 @@ from ctypes import \
     POINTER, byref, cast, addressof, string_at, \
     create_unicode_buffer, sizeof, windll, \
     c_ubyte, c_ulong, c_void_p
-from builtins import chr
 import subprocess
 import threading
 import socket
@@ -34,6 +33,10 @@ import zlib
 import time
 import sys
 import re
+try:
+    from builtins import chr
+except:
+    from __builtin__ import chr
 
 ##
 ## codepage stuff
@@ -249,7 +252,7 @@ def color(c):
 
 def printc(c, *args, **kwargs):
     color(c)
-    print(*args, **kwargs, flush=True)
+    print(*args, flush=True, **kwargs)
     color(7)
 
 ##

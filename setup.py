@@ -49,13 +49,6 @@ with open(here + '/md_rbrb.py', 'rb') as f:
 			exec(ln)
 			break
 
-about = {}
-if not VERSION:
-	with open(os.path.join(here, NAME, '__version__.py'), 'rb') as f:
-		exec(f.read().decode('utf-8'), about)
-else:
-	about['__version__'] = VERSION
-
 
 class clean2(Command):
 	description = 'Cleans the source tree'
@@ -79,7 +72,7 @@ class clean2(Command):
 		nuke = []
 		for (dirpath, dirnames, filenames) in os.walk('.'):
 			for fn in filenames:
-				or fn.endswith('.pyc') \
+				if fn.endswith('.pyc') \
 				or fn.endswith('.pyo') \
 				or fn.endswith('.pyd') \
 				or fn.startswith('MANIFEST'):
@@ -91,7 +84,7 @@ class clean2(Command):
 
 args = {
 	'name'             : NAME,
-	'version'          : about['__version__'],
+	'version'          : __version__,
 	'description'      : 'multilanguage Rabi-Ribi display',
 	'long_description' : LONG_DESCRIPTION,
 	'long_description_content_type' : LDCT,

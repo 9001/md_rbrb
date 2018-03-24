@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.dmp
 MANIFEST.in
 MANIFEST
 md_rbrb.egg-info/
