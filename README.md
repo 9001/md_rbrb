@@ -39,4 +39,5 @@ note that if the dialogue box goes away for a camera pan or whatever then you ha
 
 
 # changelog
+* 2017/03/24: v1.1 for Rabi-Ribi v1.88
 * 2017/02/19: v1.0 for Rabi-Ribi v1.75

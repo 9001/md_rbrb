@@ -19,6 +19,10 @@ __copyright__ = 2017
 ADR_BLOCK_ID = 0xd7d64
 ADR_BLOCK_POS = 0xd7d50
 
+# Rabi-Ribi v1.88
+ADR_BLOCK_ID = 0x231f8
+ADR_BLOCK_POS = 0x23630
+
 ##
 ## END OF CONFIG
 ##
