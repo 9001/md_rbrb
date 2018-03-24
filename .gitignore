@@ -9,6 +9,7 @@ md_rbrb.egg-info/
 buildenv/
 build/
 dist/
+*.rst
 
 # sublime
 *.sublime-workspace

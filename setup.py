@@ -187,7 +187,7 @@ if setuptools_available:
 		'py_modules'           : ['md_rbrb'],
 		'entry_points'         : """
 			[console_scripts]
-			md_rbrb = md_rbrb:md_rbrb
+			md_rbrb = md_rbrb:main
 		"""
 	})
 else:
